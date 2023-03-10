@@ -1,8 +1,7 @@
-# stages
 stages:
   - build
   - test
-  - deploy
+  - lint
 
 # jobs
 build:
@@ -15,30 +14,32 @@ build:
 
 test:
   stage: test
-  image: docker:latest
+  image: node:lts
   services:
-    - docker:dind
-    - docker:19.03.12-dind
+    - name: postgres:13-alpine
+      alias: db
   variables:
-    POSTGRES_DB: apply
+    POSTGRES_HOST: db
+    POSTGRES_PORT: 5432
     POSTGRES_USER: apply
     POSTGRES_PASSWORD: apply
+    POSTGRES_DB: apply
   script:
-    - docker network create apply-network
-    - docker run --name apply-db-container -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD --network apply-network -d postgres:latest
-    - docker run --name apply-app-container -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD --network apply-network -p 3000:3000 apply-app-image npm run test
+    - npm install
+    - npm run test
 
-deploy:
-  stage: deploy
-  image: docker:latest
+lint:
+  stage: lint
+  image: node:lts
   services:
-    - docker:dind
-    - docker:19.03.12-dind
+    - name: postgres:13-alpine
+      alias: db
   variables:
-    POSTGRES_DB: apply
+    POSTGRES_HOST: db
+    POSTGRES_PORT: 5432
     POSTGRES_USER: apply
     POSTGRES_PASSWORD: apply
+    POSTGRES_DB: apply
   script:
-    - docker network create apply-network
-    - docker run --name apply-db-container -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD --network apply-network -d postgres:latest
-    - docker run --name apply-app-container -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD --network apply-network -p 3000:3000 -d apply-app-image
+    - npm install
+    - npm run lint
