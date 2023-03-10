@@ -8,7 +8,6 @@ import { HttpService } from '@nestjs/axios';
 describe('ArticlesService', () => {
   let service: ArticlesService;
   let repository: Repository<Article>;
-  let httpService: HttpService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,7 +31,6 @@ describe('ArticlesService', () => {
 
     service = module.get<ArticlesService>(ArticlesService);
     repository = module.get<Repository<Article>>(getRepositoryToken(Article));
-    httpService = module.get<HttpService>(HttpService);
   });
 
   describe('getArticles', () => {
